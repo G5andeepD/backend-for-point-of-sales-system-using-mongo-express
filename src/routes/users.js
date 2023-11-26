@@ -1,74 +1,75 @@
-const express = require('express');
-const router = express.Router();
+import express from "express";
+import { User } from "../model/userModel.js";
 
-const users = [
-    { id: 1, name: 'John Doe' },
-    { id: 2, name: 'Jane Doe' },
-    { id: 3, name: 'John Smith' }
-];
+export const router = express.Router();
 
 //Routes for users
-
-// GET /users
-
-router.get('/', (req, res) => {
-    res.json(users);
+//GET all users
+router.get("/", async (req, res) => {
+    try {
+        const users = await User.find();
+        res.status(200).json(users); // Success: 200 OK
+    } catch (err) {
+        res.status(500).json({ message: err }); // Failure: 500 Internal Server Error
+    }
 });
 
-// GET /users/:id
-
-router.get('/:id', (req, res) => {
-    const id = parseInt(req.params.id);
-    const user = users.find(user => user.id === id);
-    if (!user) {
-        res.status(404).send('User not found.');
-        return;
+//GET a specific user
+router.get("/:userId", async (req, res) => {
+    try {
+        const user = await User.findById(req.params.userId);
+        if (!user) {
+            res.status(404).json({ message: "No user found" });
+            return;
+        }
+        res.status(200).json(user); // Success: 200 OK
+    } catch (err) {
+        res.status(500).json({ message: err }); // Failure: 500 Internal Server Error
     }
-    res.json(user);
 });
 
-// POST /users
+//POST a user
+router.post("/", async (req, res) => {
+    const user = new User({
+        name: req.body.name,
+    });
 
-router.post('/', (req, res) => {
-    const { name } = req.body;
-  
-    if (!name) {
-      return res.status(400).json({ message: 'Name is required' });
+    try {
+        const savedUser = await user.save();
+        res.status(201).json(savedUser); // Success: 201 Created
+    } catch (err) {
+        res.status(500).json({ message: err }); // Failure: 500 Internal Server Error
     }
-  
-    const newUser = {
-      id: users.length + 1,
-      name,
-    };
-  
-    users.push(newUser);
-  
-    res.status(201).json(newUser);
-  });
-
-// PUT /users/:id
-router.put('/:id', (req, res) => {  
-    const id = parseInt(req.params.id);
-    const user = users.find(user => user.id === id);
-    if (!user) {
-        res.status(404).send('User not found.');
-        return;
-    }
-    user.name = req.body.name;
-    res.json(user);
 });
 
-// DELETE /users/:id
-router.delete('/:id', (req, res) => {
-    const id = parseInt(req.params.id);
-    const user = users.find(user => user.id === id);
-    if (!user) {
-        res.status(404).send('User not found.');
-        return;
+//UPDATE a user
+router.patch("/:userId", async (req, res) => {
+    try {
+        const updatedUser = await User.updateOne(
+            { _id: req.params.userId },
+            { $set: { name: req.body.name } }
+        );
+        if (updatedUser.n === 0) {
+            res.status(404).json({ message: "No user found" });
+            return;
+        }
+        res.status(200).json(updatedUser); // Success: 200 OK
+    } catch (err) {
+        res.status(500).json({ message: err }); // Failure: 500 Internal Server Error
     }
-    const index = users.indexOf(user);
-    users.splice(index, 1);
-    res.json(user);
 });
 
-module.exports = router;
+//DELETE a user
+router.delete("/:userId", async (req, res) => {
+    try {
+        const removedUser = await User.deleteOne({ _id: req.params.userId });
+        if (removedUser.deletedCount === 0) {
+            res.status(404).json({ message: "No user found" });
+            return;
+        }
+        res.status(202).json(removedUser); // Success: 202 Accepted
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: err }); // Failure: 500 Internal Server Error
+    }
+});
