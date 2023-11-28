@@ -1,5 +1,5 @@
 import express from "express";
-import { mongoDBURL } from "./src/config/dbconfig.js";
+import { mongoDBURL } from "./config/dbconfig";
 import mongoose from "mongoose";
 
 const app = express();
@@ -8,11 +8,11 @@ const port = 3000;
 // Middleware to parse JSON
 app.use(express.json());
 
-import { router as usersRouter } from "./src/routes/users.js";
-import { router as productsRouter } from "./src/routes/products.js";
-import {router as userAuthRouter} from "./src/routes/userRoutes.js";
+// import { router as usersRouter } from "./routes/users.js";
+import { router as productsRouter } from "./routes/productRoutes";
+import {router as userAuthRouter} from "./routes/userRoutes";
 
-app.use("/users", usersRouter);
+// app.use("/users", usersRouter);
 app.use("/products", productsRouter);
 
 app.use("/api/users",userAuthRouter);
