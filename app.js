@@ -9,17 +9,21 @@ const port = 3000;
 app.use(express.json());
 
 import { router as usersRouter } from "./src/routes/users.js";
+import { router as productsRouter } from "./src/routes/products.js";
+import {router as userAuthRouter} from "./src/routes/userRoutes.js";
 
 app.use("/users", usersRouter);
+app.use("/products", productsRouter);
 
+app.use("/api/users",userAuthRouter);
 
+app.listen(port, () => {
+  console.log(`Server is running at http://localhost:${port}`);
+});
 mongoose
   .connect(mongoDBURL)
   .then(() => {
     console.log("Connected to MongoDB");
-    app.listen(port, () => {
-      console.log(`Server is running at http://localhost:${port}`);
-    });
   })
   .catch((err) => {
     console.log(err);
